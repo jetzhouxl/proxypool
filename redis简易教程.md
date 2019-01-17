@@ -255,13 +255,13 @@ redis 127.0.0.1:7000> exec
 如果在 set b bbb 处失败，set a 已成功不会回滚，set c 还会继续执行。
 
 ### redis事务命令
-|序号|命令及描述|
-|:------|:------|
-|1|discard 取消事务，放弃执行事务块内的所有命令|
-|2|exec执行所有事务块内的命令|
-|3|multi标记一个事务块的开始|
-|4|unwatch取消watch命令对所有key的监视。|
-|5|WATCH key [key ...] 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。|
+| 序号 | 命令及描述                                                                                                         |
+| :--- | :----------------------------------------------------------------------------------------------------------------- |
+| 1    | discard 取消事务，放弃执行事务块内的所有命令                                                                       |
+| 2    | exec执行所有事务块内的命令                                                                                         |
+| 3    | multi标记一个事务块的开始                                                                                          |
+| 4    | unwatch取消watch命令对所有key的监视。                                                                              |
+| 5    | WATCH key [key ...] 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。 |
 
 ## 七.redis脚本
 redis脚本使用Lua解释器来执行脚本。redis2.6版本通过内嵌支持Lua环境。执行脚本的常用命令为EVAL
@@ -285,14 +285,14 @@ redis 127.0.0.1:6379> EVAL "return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}" 2 key1 key
 #### redis脚本命令：
 下表列出了redis脚本常用命令：
 
-|序号|命令及描述|
-|:------|:------|
-|1|EVAL script numkeys key [key ...] arg [arg ...]执行 Lua 脚本。|
-|2|	EVALSHA sha1 numkeys key [key ...] arg [arg ...]执行 Lua 脚本。|
-|3|SCRIPT EXISTS script [script ...]查看指定的脚本是否已经被保存在缓存当中。|
-|4|SCRIPT FLUSH从脚本缓存中移除所有脚本。|
-|5|SCRIPT KILL杀死当前正在运行的 Lua 脚本|
-|6|SCRIPT LOAD script将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本|
+| 序号 | 命令及描述                                                                |
+| :--- | :------------------------------------------------------------------------ |
+| 1    | EVAL script numkeys key [key ...] arg [arg ...]执行 Lua 脚本。            |
+| 2    | EVALSHA sha1 numkeys key [key ...] arg [arg ...]执行 Lua 脚本。           |
+| 3    | SCRIPT EXISTS script [script ...]查看指定的脚本是否已经被保存在缓存当中。 |
+| 4    | SCRIPT FLUSH从脚本缓存中移除所有脚本。                                    |
+| 5    | SCRIPT KILL杀死当前正在运行的 Lua 脚本                                    |
+| 6    | SCRIPT LOAD script将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本  |
 
 ## 八.redis连接
 redis连接命令主要是用于连接redis服务。
@@ -307,13 +307,13 @@ PONG
 
 #### redis 连接命令
 下表列出了redis连接的基本命令：
-|序号|命令及描述|
-|:------|:------|
-|1|<a href='http://www.runoob.com/redis/connection-auth.html'>AUTH PASSWORD</a>验证密码是否正确|
-|2|<a href='http://www.runoob.com/redis/connection-echo.html'>ECHO message</a>打印字符串|
-|3|<a href='http://www.runoob.com/redis/connection-ping.html'>PING</a>查看服务是否运行|
-|4|<a href='http://www.runoob.com/redis/connection-quit.html'>QUIT</a>关闭当前连接|
-|5|<a href='http://www.runoob.com/redis/connection-select.html'>SELECT index</a>切换到指定的数据库|
+| 序号 | 命令及描述                                                                                      |
+| :--- | :---------------------------------------------------------------------------------------------- |
+| 1    | <a href='http://www.runoob.com/redis/connection-auth.html'>AUTH PASSWORD</a>验证密码是否正确    |
+| 2    | <a href='http://www.runoob.com/redis/connection-echo.html'>ECHO message</a>打印字符串           |
+| 3    | <a href='http://www.runoob.com/redis/connection-ping.html'>PING</a>查看服务是否运行             |
+| 4    | <a href='http://www.runoob.com/redis/connection-quit.html'>QUIT</a>关闭当前连接                 |
+| 5    | <a href='http://www.runoob.com/redis/connection-select.html'>SELECT index</a>切换到指定的数据库 |
 
 ## 九.redis数据备份与恢复
 redis SAVE命令用于创建当前数据库的备份。
