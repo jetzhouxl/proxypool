@@ -37,6 +37,23 @@ redis简易教程
       - [恢复数据](#%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE)
       - [Bgsave](#bgsave)
         - [实例](#%E5%AE%9E%E4%BE%8B-2)
+  - [九.redis安全](#%E4%B9%9Dredis%E5%AE%89%E5%85%A8)
+      - [实例](#%E5%AE%9E%E4%BE%8B-3)
+      - [语法](#%E8%AF%AD%E6%B3%95-6)
+      - [实例](#%E5%AE%9E%E4%BE%8B-4)
+  - [十.redis性能测试](#%E5%8D%81redis%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95)
+      - [语法](#%E8%AF%AD%E6%B3%95-7)
+      - [实例](#%E5%AE%9E%E4%BE%8B-5)
+  - [十一.redis客户端连接](#%E5%8D%81%E4%B8%80redis%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%BF%9E%E6%8E%A5)
+      - [最大连接数](#%E6%9C%80%E5%A4%A7%E8%BF%9E%E6%8E%A5%E6%95%B0)
+      - [实例](#%E5%AE%9E%E4%BE%8B-6)
+  - [十二.redis管道技术](#%E5%8D%81%E4%BA%8Credis%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF)
+      - [redis管道技术](#redis%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF)
+      - [实例](#%E5%AE%9E%E4%BE%8B-7)
+      - [管道技术的优势](#%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF%E7%9A%84%E4%BC%98%E5%8A%BF)
+  - [十三.redis分区](#%E5%8D%81%E4%B8%89redis%E5%88%86%E5%8C%BA)
+      - [分区的优势](#%E5%88%86%E5%8C%BA%E7%9A%84%E4%BC%98%E5%8A%BF)
+      - [分区的不足](#%E5%88%86%E5%8C%BA%E7%9A%84%E4%B8%8D%E8%B6%B3)
 
 ## 一.简介
 redis是一个开源的使用ANSI C语言编写，遵守BSD协议，支持网络，可基于内存亦可持久化的日志型，Key-Value数据库，并提供了多种语言的API。
@@ -307,6 +324,7 @@ PONG
 
 #### redis 连接命令
 下表列出了redis连接的基本命令：
+
 | 序号 | 命令及描述                                                                                      |
 | :--- | :---------------------------------------------------------------------------------------------- |
 | 1    | <a href='http://www.runoob.com/redis/connection-auth.html'>AUTH PASSWORD</a>验证密码是否正确    |
@@ -341,8 +359,145 @@ redis 127.0.0.1:6379> CONFIG GET dir
 
 Background saving started
 ```
+## 九.redis安全
+我们可以通过redis的配置文件设置密码参数，这样客户端连接到redis服务就需要密码验证，这样可以让你的redis服务更安全。
 
+#### 实例
+我们可以通过CONFIG命令来查看是否已经设置了密码验证：
+```
+127.0.0.1:6379> CONFIG get requirepass
+1) "requirepass"
+2) ""
+```
 
+默认情况下requirepass参数是空的，这就意味着你无需通过密码验证就可以连接到redis服务。
+
+你可以通过config set命令来修改该参数：
+```
+127.0.0.1:6379> CONFIG set requirepass "runoob"
+OK
+127.0.0.1:6379> CONFIG get requirepass
+1) "requirepass"
+2) "runoob"
+```
+
+设置密码后，客户端连接redis服务就需要密码验证，否则无法执行命令。
+
+#### 语法
+AUTH命令基本语法格式如下：
+```
+127.0.0.1:6379> AUTH password
+```
+
+#### 实例
+```
+127.0.0.1:6379> AUTH "runoob"
+OK
+127.0.0.1:6379> SET mykey "Test value"
+OK
+127.0.0.1:6379> GET mykey
+"Test value"
+```
+
+## 十.redis性能测试
+redis性能测试是通过同时执行多个命令实现的。
+
+#### 语法
+redis性能测试的基本命令如下：
+```
+redis-benchmark [option] [option value]
+```
+
+#### 实例
+以下实例同时执行10000个请求来检测性能：
+
+```
+$ redis-benchmark -n 10000  -q
+
+PING_INLINE: 141043.72 requests per second
+PING_BULK: 142857.14 requests per second
+SET: 141442.72 requests per second
+GET: 145348.83 requests per second
+INCR: 137362.64 requests per second
+LPUSH: 145348.83 requests per second
+LPOP: 146198.83 requests per second
+SADD: 146198.83 requests per second
+SPOP: 149253.73 requests per second
+LPUSH (needed to benchmark LRANGE): 148588.42 requests per second
+LRANGE_100 (first 100 elements): 58411.21 requests per second
+LRANGE_300 (first 300 elements): 21195.42 requests per second
+LRANGE_500 (first 450 elements): 14539.11 requests per second
+LRANGE_600 (first 600 elements): 10504.20 requests per second
+MSET (10 keys): 93283.58 requests per second
+```
+
+## 十一.redis客户端连接
+redis通过监听一个TCP端口或者UNIX socket的方式来接收来自客户端的连接，当一个连接建立后，redis内部会进行以下一些操作：
+
+- 首先，客户端socket会被设置为非阻塞模式，因为redis在网络事件处理上采用的是非阻塞多路复用模型
+- 然后为这个socket设置TCP_NODELAY属性，禁用Nagle算法
+- 然后创建一个可读的文件事件用于监听这个客户端socket的数据发送
+  
+#### 最大连接数
+在 Redis2.4 中，最大连接数是被直接硬编码在代码里面的，而在2.6版本中这个值变成可配置的。
+
+maxclients 的默认值是 10000，你也可以在 redis.conf 中对这个值进行修改。
+
+```
+config get maxclients
+
+1) "maxclients"
+2) "10000"
+```
+
+#### 实例
+以下实例我们在服务启动时设置最大连接数为 100000：
+```
+redis-server --maxclients 100000
+```
+
+## 十二.redis管道技术
+redis是一种基于c/s模型以及请求/响应协议的TCP服务。这意味着通常情况下一个请求会遵循以下步骤：
+
+- 客户端向服务端发送一个查询请求，并监听socket返回，通常是以阻塞模式，等待服务端响应。
+- 服务端处理命令，并将结果返回给客户端。
+  
+#### redis管道技术
+redis管道技术可以在服务端未响应时，客户端可以继续向服务端发送请求，并最终一次性读取所有服务端的响应。
+
+#### 实例
+查看 redis 管道，只需要启动 redis 实例并输入以下命令：
+```
+$(echo -en "PING\r\n SET runoobkey redis\r\nGET runoobkey\r\nINCR visitor\r\nINCR visitor\r\nINCR visitor\r\n"; sleep 10) | nc localhost 6379
+
++PONG
++OK
+redis
+:1
+:2
+:3
+```
+以上实例中我们通过使用 PING 命令查看redis服务是否可用， 之后我们设置了 runoobkey 的值为 redis，然后我们获取 runoobkey 的值并使得 visitor 自增 3 次。
+
+在返回的结果中我们可以看到这些命令一次性向 redis 服务提交，并最终一次性读取所有服务端的响应.
+（管道和事务的区别？）
+
+#### 管道技术的优势
+管道技术最显著的优势是提高了redis服务的性能。
+
+## 十三.redis分区
+分区是分割数据到多个redis实例的处理过程，因此每个实例只保存key的一个子集。
+#### 分区的优势
+- 通过利用多台计算机内存的和值，允许我们构造更大的数据库。
+- 通过多核和多台计算机，允许我们扩展计算能力；通过多台计算机和网络适配器，允许我们扩展网络带宽。
+  
+#### 分区的不足
+redis的一些特性在分区方面表现的不是很好：
+
+- 涉及多个key的操作通常是不被支持的。举例来说，当两个set映射到不同的redis实例上时，你就不能对这两个set执行交集操作。
+- 涉及多个key的redis事务不能使用。
+- 当使用分区时，数据处理较为复杂，比如你需要处理多个rdb/aof文件，并且从多个实例和主机备份持久化文件。
+- 增加或删除容量也比较复杂。redis集群大多数支持在运行时增加、删除节点的透明数据平衡的能力，但是类似于客户端分区、代理等其他系统则不支持这项特性。然而，一种叫做presharding的技术对此是有帮助的。
 
 
 
