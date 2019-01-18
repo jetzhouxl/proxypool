@@ -248,8 +248,8 @@ redis 127.0.0.1:6379> EXEC
 2) "Mastering C++ in 21 days"
 3) (integer) 3
 4) 1) "Mastering Series"
-   2) "C++"
-   3) "Programming"
+   1) "C++"
+   2) "Programming"
 ```
 单个redis命令是原子性的，但redis没有在事务上增加任何维持原子性的机制，所以redis事务的执行并不是原子性的。
 事务可以理解为一个打包的批量执行脚本，但批量指令并非原子化的操作，中间某条指令的失败不会导致前面已做指令的回滚，也不会造成后续的指令不做。
